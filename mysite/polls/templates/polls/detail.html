@@ -3,16 +3,25 @@
 {% block title %}Question detail{% endblock %}
 
 {% block content %}
-<h1>{{ question.question_text }}</h1>
+<div class="w3-container">
+  <h1>{{ question.question_text }}</h1>
+  <p>
+    Published <span class="w3-text-gray">{{ question.pub_date|timesince }} ago</span>
+    by <span class="w3-tag">unknown</span>
+  </p>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="{% url 'polls:vote' question.id %}" method="post">
-  {% csrf_token %}
-  {% for choice in question.choice_set.all %}
-  <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-  <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-  {% endfor %}
-  <input type="submit" value="Vote">
-</form>
+  <form action="{% url 'polls:vote' question.id %}" method="post">
+    {% csrf_token %}
+    {% for choice in question.choice_set.all %}
+    <input class="w3-radio" type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+    {% endfor %}
+    <div class="w3-bar w3-margin-top">
+      <input class="w3-button w3-green" type="submit" value="Vote">
+      <a class="w3-button w3-black" href="{% url 'polls:index' %}">Back to List</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

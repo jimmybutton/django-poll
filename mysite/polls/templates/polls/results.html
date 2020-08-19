@@ -1,15 +1,86 @@
 {% extends "polls/base.html" %}
 
+{% load static %}
+
 {% block title %}Question results{% endblock %}
 
 {% block content %}
-<h1>{{ question.question_text }}</h1>
+<div class="w3-container">
+  <h1>{{ question.question_text }}</h1>
+  <p>
+    Published <span class="w3-text-gray">{{ question.pub_date|timesince }} ago</span>
+    by <span class="w3-tag">unknown</span>
+  </p>
+</div>
 
-<ul>
-  {% for choice in question.choice_set.all %}
-  <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-  {% endfor %}
-</ul>
+<div class="w3-row">
+  <div class="w3-half w3-container">
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Choice</th>
+        <th>Votes</th>
+        <th>Percentage</th>
+      </tr>
 
-<a href="{% url 'polls:detail' question.id %}">Vote again?</a>
+      {% for choice in question.choice_set.all %}
+      <tr>
+        <td>{{ choice.choice_text }}</td>
+        <td>{{ choice.votes }}</td>
+        <td>{% widthratio choice.votes question.num_votes 100 %} %</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td class="w3-right-align"><strong>Total</strong></td>
+        <td><strong>{{ question.num_votes }}</strong></td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+  <div class="w3-half w3-container">
+    <canvas id="myChart"></canvas>
+  </div>
+</div>
+
+<div class="w3-container">
+  <div class="w3-bar w3-margin-top">
+    <a class="w3-button w3-green" href="{% url 'polls:detail' question.id %}">Vote</a>
+    <a class="w3-button w3-black" href="{% url 'polls:index' %}">Back to List</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="{% static 'polls/chartjs-plugin-colorschemes.min.js' %}"></script>
+
+{{ chartdata|json_script:"chartdata" }}
+<script>
+  var ctx = document.getElementById('myChart').getContext('2d');
+  const chartdata = JSON.parse(document.getElementById('chartdata').textContent);
+  var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'doughnut',
+
+    // The data for our dataset
+    data: {
+      datasets: [{
+        data: chartdata.data  // [10, 20, 30],
+      }],
+
+      // These labels appear in the legend and in the tooltips when hovering different arcs
+      labels: chartdata.labels  // ['Red','Yellow','Blue']
+    },
+
+    // Configuration options go here
+    options: {
+      plugins: {
+        colorschemes: {
+          scheme: 'brewer.Paired12'
+        }
+      }
+    }
+
+  });
+</script>
 {% endblock %}
